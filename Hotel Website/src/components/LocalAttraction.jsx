@@ -1,4 +1,4 @@
-
+import  { motion } from "framer-motion"
 const attractions = [
   {
     name: "Sunset Beach",
@@ -17,6 +17,12 @@ export default function LocalAttractions() {
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Explore Nearby</h2>
+          <motion.div
+            initial={{ opacity: 0, y: 150 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, amount: 0.3 }}
+          >
         <div className="grid md:grid-cols-2 gap-8">
           {attractions.map((item, index) => (
             <div key={index} className="relative rounded-xl overflow-hidden h-64">
@@ -32,6 +38,8 @@ export default function LocalAttractions() {
             </div>
           ))}
         </div>
+      </motion.div>
+
       </div>
     </section>
   );

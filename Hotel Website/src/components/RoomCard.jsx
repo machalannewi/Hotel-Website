@@ -1,5 +1,6 @@
 // components/RoomShowcase.js
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import rooms from "@/lib/rooms.json";
 
@@ -9,6 +10,13 @@ export default function RoomCard() {
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Our Rooms & Suites</h2>
+
+         <motion.div
+            initial={{ opacity: 0, y: 150 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, amount: 0.3 }}
+          >
         <div className="grid md:grid-cols-2 gap-8">
           {rooms.map((room) => (
             <div key={room.id} className="bg-white rounded-xl overflow-hidden shadow-lg">
@@ -31,6 +39,8 @@ export default function RoomCard() {
             </div>
           ))}
         </div>
+        </motion.div>
+
         <div className="text-center mt-8">
           <Link 
             to="/rooms" 
