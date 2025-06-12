@@ -13,7 +13,7 @@ export default function Hero() {
   >
   <div 
       className="relative h-screen bg-cover bg-center flex items-center"
-      style={{ backgroundImage: "url('/images/Hero-banner.jpg')" }}
+      style={{ backgroundImage: "url('/images/Hero-banner.webp')" }}
     >
       <div className="absolute inset-0 bg-black opacity-40"></div>
       <div className="container mx-auto px-4 z-10">

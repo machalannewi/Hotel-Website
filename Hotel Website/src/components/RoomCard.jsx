@@ -3,9 +3,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import rooms from "@/lib/rooms.json";
+import BookingModal from './BookingModal';
+import { useState } from 'react';
 
 
-export default function RoomCard() {
+export default function RoomCard({room}) {
+
+const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -30,7 +35,7 @@ export default function RoomCard() {
                 <p className="text-gray-600 mb-4">{room.description}</p>
                 <p className="text-blue-600 text-lg font-semibold mb-4">${room.price}/night</p>
                 <Link
-                  to={`/rooms/${room.id}`}
+                 onClick={() => setIsModalOpen(true)}
                   className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
                 >
                   Book Now
@@ -49,6 +54,12 @@ export default function RoomCard() {
             View All Rooms →
           </Link>
         </div>
+
+        <BookingModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        room={room}
+      />
       </div>
     </section>
   );
