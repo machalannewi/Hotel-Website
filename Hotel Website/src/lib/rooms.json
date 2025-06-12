@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "name": "Deluxe Ocean View",
+    "price": 249,
+    "image": "/images/Hotel-room1.jpg",
+    "description": "Wake up to breathtaking ocean views with a private balcony."
+  },
+  {
+    "id": 2,
+    "name": "Luxury Suite",
+    "price": 399,
+    "image": "/images/Hotel-room2.jpg",
+    "description": "Spacious suite with a king-sized bed and jacuzzi."
+  },
+  {
+    "id": 3,
+    "name": "Diamond Complex",
+    "price": 399,
+    "image": "/images/Hotel-room1.jpg",
+    "description": "Spacious suite with a king-sized bed and jacuzzi."
+  },
+  {
+    "id": 4,
+    "name": "Premium Suite",
+    "price": 399,
+    "image": "/images/Hotel-room2.jpg",
+    "description": "Spacious suite with a king-sized bed and jacuzzi."
+  }
+]

@@ -93,7 +93,7 @@ export default function Header() {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Getting started</NavigationMenuTrigger>
+                <NavigationMenuTrigger>Home</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-3 p-6 w-[300px] sm:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                     <li className="row-span-3">
@@ -124,7 +124,7 @@ export default function Header() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Components</NavigationMenuTrigger>
+                <NavigationMenuTrigger>About</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid w-[300px] sm:w-[400px] md:w-[500px] lg:w-[600px] gap-3 p-4 md:grid-cols-2">
                     {components.map((component) => (
@@ -140,8 +140,8 @@ export default function Header() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()} href="/docs">
-                  Documentation
+                <NavigationMenuLink className={navigationMenuTriggerStyle()} href="/">
+                  Contact
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>

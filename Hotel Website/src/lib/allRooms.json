@@ -1,0 +1,53 @@
+
+[
+  {
+    "id": 1,
+    "name": "Deluxe Ocean View",
+    "price": 59,
+    "image": "/images/Hotel-room1.jpg",
+    "size": "320 sq ft",
+    "beds": "1 King Bed",
+    "description": "Wake up to breathtaking ocean views with a private balcony.",
+    "amenities": ["Balcony", "Free WiFi", "Ocean View"]
+  },
+  {
+    "id": 2,
+    "name": "Luxury Suite",
+    "price": 399,
+    "image": "/images/Hotel-room2.jpg",
+    "size": "550 sq ft",
+    "beds": "1 King Bed + Sofa Bed",
+    "description": "Wake up to breathtaking ocean views with a private balcony.",
+    "amenities": ["Jacuzzi", "Kitchenette", "Private Terrace"]
+  },
+  {
+    "id": 3,
+    "name": "Luxury Suite",
+    "price": 399,
+    "image": "/images/Hotel-room2.jpg",
+    "size": "550 sq ft",
+    "beds": "1 King Bed + Sofa Bed",
+    "description": "Wake up to breathtaking ocean views with a private balcony.",
+    "amenities": ["Jacuzzi", "Kitchenette", "Private Terrace"]
+  },
+  {
+    "id": 4,
+    "name": "Luxury Suite",
+    "price": 700,
+    "image": "/images/Hotel-room2.jpg",
+    "size": "550 sq ft",
+    "beds": "1 King Bed + Sofa Bed",
+    "description": "Wake up to breathtaking ocean views with a private balcony.",
+    "amenities": ["Jacuzzi", "Kitchenette", "Private Terrace"]
+  },
+  {
+    "id": 5,
+    "name": "Luxury Suite",
+    "price": 599,
+    "image": "/images/Hotel-room2.jpg",
+    "size": "550 sq ft",
+    "beds": "1 King Bed + Sofa Bed",
+    "description": "Wake up to breathtaking ocean views with a private balcony.",
+    "amenities": ["Jacuzzi", "Kitchenette", "Private Terrace"]
+  }
+]
