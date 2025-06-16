@@ -2,9 +2,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { checkAvailability } from '../services/api';
 
 const BookingModal = ({ isOpen, onClose, room }) => {
   const [step, setStep] = useState(1);
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
+  const [availabilityMessage, setAvailabilityMessage] = useState("")
   const [formData, setFormData] = useState({
     checkIn: '',
     checkOut: '',
@@ -38,6 +41,26 @@ const BookingModal = ({ isOpen, onClose, room }) => {
       });
     }
   }, [isOpen]);
+
+
+// Replace your mock function with:
+const handleAvailabilityCheck = async () => {
+  setIsCheckingAvailability(true);
+  try {
+    const result = await checkAvailability(
+      room.id,
+      formData.checkIn,
+      formData.checkOut
+    );
+    setAvailabilityMessage(result.message);
+    if (result.available) setStep(2);
+  } catch (error) {
+    setAvailabilityMessage("Error checking availability", error);
+  } finally {
+    setIsCheckingAvailability(false);
+  }
+};
+
 
 
   return (
@@ -186,7 +209,9 @@ const BookingModal = ({ isOpen, onClose, room }) => {
                   <div></div>
                 )}
                 <button
-                  onClick={step === 2 ? () => nextStep() : nextStep}
+                  onClick={
+                    step === 2 ? (handleAvailabilityCheck ? () => nextStep() : nextStep) : null
+                  }
                   disabled={step === 1 && (!formData.checkIn || !formData.checkOut)}
                   className={`px-6 py-2 rounded-lg ${step === 1 && (!formData.checkIn || !formData.checkOut) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                 >
