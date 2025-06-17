@@ -2,30 +2,49 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { checkAvailability } from '../services/api';
+import { checkAvailability, createBooking } from '../services/api';
 
 const BookingModal = ({ isOpen, onClose, room }) => {
   const [step, setStep] = useState(1);
-  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
-  const [availabilityMessage, setAvailabilityMessage] = useState("")
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [availabilityMessage, setAvailabilityMessage] = useState("");
   const [formData, setFormData] = useState({
     checkIn: '',
     checkOut: '',
     guests: 1,
-    promoCode: ''
+    promoCode: '',
+    email: '',
+    phone: '',
+    fullName: ''
   });
 
-  const handleChange = (e) => {
-
-  const { name, value } = e.target;
-  if (name === "checkOut" && formData.checkIn && value < formData.checkIn) {
-    return;
-  }
+  // Calculate number of nights between check-in and check-out
+  const calculateNights = () => {
+    if (!formData.checkIn || !formData.checkOut) return 0;
     
-  setFormData({ ...formData, [name]: value });
+    const checkInDate = new Date(formData.checkIn);
+    const checkOutDate = new Date(formData.checkOut);
+    const timeDifference = checkOutDate.getTime() - checkInDate.getTime();
+    const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+    
+    return daysDifference > 0 ? daysDifference : 0;
   };
 
+  // Calculate total price based on number of nights
+  const calculateTotalPrice = () => {
+    const nights = calculateNights();
+    if (!room || !room.price || nights === 0) return 0;
+    return room.price * nights;
+  };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "checkOut" && formData.checkIn && value < formData.checkIn) {
+      return;
+    }
+    
+    setFormData({ ...formData, [name]: value });
+  };
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
@@ -33,35 +52,72 @@ const BookingModal = ({ isOpen, onClose, room }) => {
   useEffect(() => {
     if (!isOpen) {
       setStep(1);
+      setAvailabilityMessage("");
       setFormData({
         checkIn: '',
         checkOut: '',
         guests: 1,
-        promoCode: ''
+        promoCode: '',
+        email: '',
+        phone: '',
+        fullName: ''
       });
     }
   }, [isOpen]);
 
+  const handleAvailabilityCheck = async () => {
+    if (!room || !room.id) {
+      setAvailabilityMessage("Room information is missing. Please try again.");
+      return;
+    }
 
-// Replace your mock function with:
-const handleAvailabilityCheck = async () => {
-  setIsCheckingAvailability(true);
-  try {
-    const result = await checkAvailability(
-      room.id,
-      formData.checkIn,
-      formData.checkOut
-    );
-    setAvailabilityMessage(result.message);
-    if (result.available) setStep(2);
-  } catch (error) {
-    setAvailabilityMessage("Error checking availability", error);
-  } finally {
-    setIsCheckingAvailability(false);
-  }
-};
+    setIsCheckingAvailability(true);
+    setAvailabilityMessage("");
+    
+    try {
+      const result = await checkAvailability(
+        room.id,
+        formData.checkIn,
+        formData.checkOut
+      );
+      
+      setAvailabilityMessage(result.message);
+      
+      if (result.available) {
+        setStep(3);
+
+      const bookingData = await createBooking (
+            room.id,
+            formData.checkIn,
+            formData.checkOut,
+            formData.email,
+            formData.phone,
+            formData.fullName,
+            formData.guests,
+            formData.promoCode
+          );
+        console.log('Booking created:', bookingData);
+      }
+    } catch (error) {
+      console.error("Error checking availability:", error);
+      setAvailabilityMessage("Error checking availability. Please try again.");
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
 
 
+  const handleContinueClick = () => {
+    if (step === 1) {
+      nextStep();
+    } else if (step === 2) {
+      handleAvailabilityCheck();
+    }
+  };
+
+  // Get nights and total for display
+  const nights = calculateNights();
+  const totalPrice = calculateTotalPrice();
 
   return (
     <AnimatePresence>
@@ -91,7 +147,6 @@ const handleAvailabilityCheck = async () => {
                 <XMarkIcon className="h-6 w-6" />
               </button>
             </div>
-
 
             <div className="p-6">
               {step === 1 && (
@@ -137,6 +192,20 @@ const handleAvailabilityCheck = async () => {
                         ))}
                       </select>
                     </div>
+                    
+                    {/* Price Preview in Step 1 */}
+                    {nights > 0 && room && (
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <div className="flex justify-between items-center">
+                          <span className="text-blue-700 font-medium">
+                            {nights} {nights === 1 ? 'night' : 'nights'} × ${room.price}
+                          </span>
+                          <span className="text-blue-800 font-bold text-lg">
+                            ${totalPrice}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -147,27 +216,68 @@ const handleAvailabilityCheck = async () => {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <h4 className="font-medium mb-4">Payment Details</h4>
+                  <h4 className="font-medium mb-4">Enter your details</h4>
                   <div className="space-y-4">
                     <div>
+                      <label className="block text-sm text-gray-600 mb-1">Full Name</label>
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        className="w-full p-3 border rounded-lg mb-4"
+                        placeholder="Full Name"
+                      />
+                      <label className="block text-sm text-gray-600 mb-1">Email</label>
+                      <input
+                        type="text"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full p-3 border rounded-lg mb-4"
+                        placeholder="Email"
+                      />
+                      <label className="block text-sm text-gray-600 mb-1">Phone</label>
+                      <input
+                        type="text"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="w-full p-3 border rounded-lg mb-4"
+                        placeholder="Phone"
+                      />
                       <label className="block text-sm text-gray-600 mb-1">Promo Code (Optional)</label>
                       <input
                         type="text"
                         name="promoCode"
                         value={formData.promoCode}
                         onChange={handleChange}
-                        className="w-full p-3 border rounded-lg"
+                        className="w-full p-3 border rounded-lg mb-4"
                         placeholder="Enter code"
                       />
                     </div>
                     {/* Add payment fields here */}
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <div className="flex justify-between mb-2">
-                        <span>Total:</span>
-                        <span className="font-bold">${room ? room.price * 2 : '0'}</span>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">
+                            {nights} {nights === 1 ? 'night' : 'nights'} × ${room ? room.price : '0'}
+                          </span>
+                          <span>${totalPrice}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-lg border-t pt-2">
+                          <span>Total:</span>
+                          <span>${totalPrice}</span>
+                        </div>
                       </div>
-                      <small className="text-gray-500">*2 nights estimate</small>
                     </div>
+                    
+                    {/* Show availability message */}
+                    {availabilityMessage && (
+                      <div className={`p-3 rounded-lg ${availabilityMessage.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
+                        {availabilityMessage}
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -184,7 +294,10 @@ const handleAvailabilityCheck = async () => {
                     </svg>
                   </div>
                   <h4 className="text-xl font-bold mb-2">Booking Confirmed!</h4>
-                  <p className="text-gray-600 mb-6">We've sent the details to your email.</p>
+                  <p className="text-gray-600 mb-2">We've sent the details to your email.</p>
+                  <p className="text-sm text-gray-500 mb-6">
+                    {nights} {nights === 1 ? 'night' : 'nights'} • Total: ${totalPrice}
+                  </p>
                   <button
                     onClick={onClose}
                     className="bg-blue-600 text-white px-6 py-3 rounded-lg w-full hover:bg-blue-700"
@@ -209,13 +322,24 @@ const handleAvailabilityCheck = async () => {
                   <div></div>
                 )}
                 <button
-                  onClick={
-                    step === 2 ? (handleAvailabilityCheck ? () => nextStep() : nextStep) : null
+                  onClick={handleContinueClick}
+                  disabled={
+                    (step === 1 && (!formData.checkIn || !formData.checkOut)) ||
+                    (step === 2 && isCheckingAvailability)
                   }
-                  disabled={step === 1 && (!formData.checkIn || !formData.checkOut)}
-                  className={`px-6 py-2 rounded-lg ${step === 1 && (!formData.checkIn || !formData.checkOut) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  className={`px-6 py-2 rounded-lg ${
+                    (step === 1 && (!formData.checkIn || !formData.checkOut)) ||
+                    (step === 2 && isCheckingAvailability)
+                      ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
-                  {step === 2 ? 'Confirm Booking' : 'Continue'}
+                  {step === 2 && isCheckingAvailability 
+                    ? 'Checking...' 
+                    : step === 2 
+                    ? 'Confirm Booking' 
+                    : 'Continue'
+                  }
                 </button>
               </div>
             )}
