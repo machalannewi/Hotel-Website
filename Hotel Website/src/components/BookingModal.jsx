@@ -18,7 +18,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
     fullName: ''
   });
 
-  // Calculate number of nights between check-in and check-out
+
   const calculateNights = () => {
     if (!formData.checkIn || !formData.checkOut) return 0;
     
@@ -30,7 +30,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
     return daysDifference > 0 ? daysDifference : 0;
   };
 
-  // Calculate total price based on number of nights
+
   const calculateTotalPrice = () => {
     const nights = calculateNights();
     if (!room || !room.price || nights === 0) return 0;
@@ -135,7 +135,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
             transition={{ type: 'spring', damping: 25 }}
             className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
           >
-            {/* Header */}
+
             <div className="flex justify-between items-center p-6 border-b">
               <h3 className="text-xl font-bold">
                 {room ? `Book ${room.name}` : 'Book Your Stay'}
@@ -193,7 +193,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
                       </select>
                     </div>
                     
-                    {/* Price Preview in Step 1 */}
+
                     {nights > 0 && room && (
                       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                         <div className="flex justify-between items-center">
@@ -256,7 +256,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
                         placeholder="Enter code"
                       />
                     </div>
-                    {/* Add payment fields here */}
+
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <div className="space-y-2">
                         <div className="flex justify-between">
@@ -272,7 +272,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
                       </div>
                     </div>
                     
-                    {/* Show availability message */}
+
                     {availabilityMessage && (
                       <div className={`p-3 rounded-lg ${availabilityMessage.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
                         {availabilityMessage}
@@ -308,7 +308,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
               )}
             </div>
 
-            {/* Footer Navigation */}
+
             {step < 3 && (
               <div className="p-4 border-t flex justify-between">
                 {step > 1 ? (

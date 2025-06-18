@@ -17,14 +17,14 @@
     "id": 3,
     "name": "Diamond Complex",
     "price": 399,
-    "image": "/images/Hotel-room1.jpg",
+    "image": "/images/modern-studio-apartment-design-with-bedroom-living-space.jpg",
     "description": "Spacious suite with a king-sized bed and jacuzzi."
   },
   {
     "id": 4,
     "name": "Premium Suite",
     "price": 399,
-    "image": "/images/Hotel-room2.jpg",
+    "image": "/images/3d-rendering-luxury-bedroom-suite-resort-hotel-with-twin-bed-living.jpg",
     "description": "Spacious suite with a king-sized bed and jacuzzi."
   }
 ]

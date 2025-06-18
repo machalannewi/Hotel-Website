@@ -22,9 +22,9 @@
   },
   {
     "id": 3,
-    "name": "Luxury Suite",
+    "name": "Diamond Complex",
     "price": 399,
-    "image": "/images/Hotel-room2.jpg",
+    "image": "/images/modern-studio-apartment-design-with-bedroom-living-space.jpg",
     "size": "550 sq ft",
     "beds": "1 King Bed + Sofa Bed",
     "description": "Wake up to breathtaking ocean views with a private balcony.",
@@ -32,19 +32,9 @@
   },
   {
     "id": 4,
-    "name": "Luxury Suite",
+    "name": "Premium Suite",
     "price": 700,
-    "image": "/images/Hotel-room2.jpg",
-    "size": "550 sq ft",
-    "beds": "1 King Bed + Sofa Bed",
-    "description": "Wake up to breathtaking ocean views with a private balcony.",
-    "amenities": ["Jacuzzi", "Kitchenette", "Private Terrace"]
-  },
-  {
-    "id": 5,
-    "name": "Luxury Suite",
-    "price": 599,
-    "image": "/images/Hotel-room2.jpg",
+    "image": "/images/3d-rendering-luxury-bedroom-suite-resort-hotel-with-twin-bed-living.jpg",
     "size": "550 sq ft",
     "beds": "1 King Bed + Sofa Bed",
     "description": "Wake up to breathtaking ocean views with a private balcony.",
