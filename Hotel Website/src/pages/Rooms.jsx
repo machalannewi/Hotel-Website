@@ -17,7 +17,7 @@ export default function Rooms() {
       {/* Hero Banner */}
       <div className="relative bg-cover bg-center h-64 flex items-center justify-center bg-[url('/images/woman-talking-phone-front-view.jpg')]">
         <div className="absolute inset-0 bg-black/50"></div>
-         <div className="relative bg-black bg-opacity-50 w-full h-full flex items-center justify-center">
+         <div className="relative bg-opacity-50 w-full h-full flex items-center justify-center">
           <h1 className="relative text-4xl font-bold text-white">Our Rooms</h1>
         </div>
       </div>
