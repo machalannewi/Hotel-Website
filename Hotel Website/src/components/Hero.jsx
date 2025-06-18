@@ -33,7 +33,7 @@ export default function Hero() {
           transition={{duration: 0.8}}
           >
           <p className="text-xl text-white mb-8">
-            Experience coastal elegance at Freehand Hotels.
+            Experience coastal elegance at Monarch Hotels.
           </p>
           </motion.div>
 

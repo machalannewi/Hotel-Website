@@ -1,5 +1,8 @@
 import inputAvailableRoom from "../models/bookings.js"
 
+
+let changeBooking;
+
 const createBooking = async (req, res) => {
     try {
         const {
@@ -10,10 +13,11 @@ const createBooking = async (req, res) => {
         phone,
         fullName,
         guests,
-        promoCode
+        promoCode,
+        totalPrice
        } = req.query;
 
-        if (!roomId || !checkIn || !checkOut || !email || !phone || !fullName || !guests || !promoCode) {
+        if (!roomId || !checkIn || !checkOut || !email || !phone || !fullName || !guests || !promoCode || !totalPrice) {
            return res.status(400).json({ error: "Missing required parameters" });
         }
 
@@ -25,7 +29,8 @@ const createBooking = async (req, res) => {
             phone,
             fullName,
             guests,
-            promoCode
+            promoCode,
+            totalPrice
       )
 
       res.json({

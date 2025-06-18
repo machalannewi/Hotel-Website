@@ -9,8 +9,8 @@ export const checkAvailability = async (roomId, checkIn, checkOut) => {
 };
 
 
-export const createBooking = async (roomId, checkIn, checkOut, email, phone, fullName, guests, promoCode) => {
-const response = await fetch(`${API_BASE_URL}/api/bookings/input?roomId=${roomId}&checkIn=${checkIn}&checkOut=${checkOut}&email=${email}&phone=${phone}&fullName=${fullName}&guests=${guests}&promoCode=${promoCode}`)
+export const createBooking = async (roomId, checkIn, checkOut, email, phone, fullName, guests, promoCode, totalPrice) => {
+const response = await fetch(`${API_BASE_URL}/api/bookings/input?roomId=${roomId}&checkIn=${checkIn}&checkOut=${checkOut}&email=${email}&phone=${phone}&fullName=${fullName}&guests=${guests}&promoCode=${promoCode}&totalPrice=${totalPrice}`)
   if (!response.ok) throw new Error('Booking failed');
   return await response.json();
 }

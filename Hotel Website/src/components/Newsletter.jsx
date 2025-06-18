@@ -3,7 +3,7 @@ import {motion} from "framer-motion";
 
 export default function Newsletter() {
   return (
-    <section className="py-16 bg-blue-600 text-white">
+    <section className="py-16 bg-gray-950 text-white">
       <div className="container mx-auto px-4 text-center">
         <motion.div
         initial={{opacity: 0, y: -50}}
@@ -11,7 +11,7 @@ export default function Newsletter() {
         transition={{duration: 0.8}}
         viewport={{ once: true, amount: 0.3 }}
         >
-        <h2 className="text-3xl font-bold mb-4">Get Exclusive Offers</h2>
+        <h2 className="text-2xl font-bold mb-4">Get Exclusive Offers</h2>
         </motion.div>
 
         <motion.div
@@ -47,7 +47,7 @@ export default function Newsletter() {
             >
           <button 
             type="submit"
-            className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100"
+            className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-100"
           >
             Subscribe
           </button>

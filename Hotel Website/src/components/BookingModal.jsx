@@ -94,8 +94,12 @@ const BookingModal = ({ isOpen, onClose, room }) => {
             formData.phone,
             formData.fullName,
             formData.guests,
-            formData.promoCode
+            formData.promoCode,
+            totalPrice
           );
+          let changeBooking;
+
+          {bookingData.booked: changeBooking}
         console.log('Booking created:', bookingData);
       }
     } catch (error) {
@@ -115,7 +119,6 @@ const BookingModal = ({ isOpen, onClose, room }) => {
     }
   };
 
-  // Get nights and total for display
   const nights = calculateNights();
   const totalPrice = calculateTotalPrice();
 
