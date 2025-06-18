@@ -11,7 +11,7 @@ const port = 5000;
 app.use(express.json())
 
 dotenv.config();
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: "https://the-monarch-sepia.vercel.app" }));
 
 
 app.use('/api/rooms', roomsRouter);

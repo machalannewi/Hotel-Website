@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000'; // Your backend URL
+const API_BASE_URL = 'https://hotel-website-72pz.onrender.com'; // Your backend URL
 
 export const checkAvailability = async (roomId, checkIn, checkOut) => {
   const response = await fetch(
