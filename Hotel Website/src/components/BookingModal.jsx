@@ -97,9 +97,6 @@ const BookingModal = ({ isOpen, onClose, room }) => {
             formData.promoCode,
             totalPrice
           );
-          let changeBooking;
-
-          {bookingData.booked: changeBooking}
         console.log('Booking created:', bookingData);
       }
     } catch (error) {
