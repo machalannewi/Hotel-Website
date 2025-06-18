@@ -3,6 +3,7 @@ import React from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from "../components/Navbar";
+import Footer from "../components/Footer";
 import allRooms from "@/lib/allRooms.json"
 
 
@@ -16,17 +17,17 @@ export default function Rooms() {
       {/* Hero Banner */}
       <div 
         className="bg-cover bg-center h-64 flex items-center justify-center"
-        style={{ backgroundImage: "url('/images/rooms-hero.jpg')" }}
       >
-        <div className="bg-black bg-opacity-50 w-full h-full flex items-center justify-center">
-          <h1 className="text-4xl font-bold text-white">Our Rooms</h1>
+        <div className="relative bg-black bg-opacity-50 w-full h-full flex items-center justify-center bg-[url('/images/woman-talking-phone-front-view.jpg')]">
+        <div className="absolute inset-0 bg-black/50"></div>
+          <h1 className="relative text-4xl font-bold text-white">Our Rooms</h1>
         </div>
       </div>
 
       {/* Filter & Room Listings */}
       <section className="container mx-auto px-4 py-16">
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">Filter by Price</h2>
+          <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Filter by Price</h2>
           <input 
             type="range" 
             min="100" 
@@ -67,6 +68,7 @@ export default function Rooms() {
         </div>
       </section>
     </div>
+    <Footer />
     </>
   );
 }
