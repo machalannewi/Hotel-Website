@@ -4,7 +4,7 @@ const verifyRoomAvailability = async (req, res) => {
   try {
     const { roomId, checkIn, checkOut } = req.query;
     
-    // Input validation
+
     if (!roomId || !checkIn || !checkOut) {
       return res.status(400).json({ error: "Missing required parameters" });
     }

@@ -1,8 +1,6 @@
 import inputAvailableRoom from "../models/bookings.js"
 
 
-let changeBooking;
-
 const createBooking = async (req, res) => {
     try {
         const {
