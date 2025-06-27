@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { checkAvailability, initializePayment, verifyPayment, createBooking } from '../services/api';
+import { checkAvailability, initializePayment } from '../services/api';
 
 const BookingModal = ({ isOpen, onClose, room }) => {
   const [step, setStep] = useState(1);
@@ -86,7 +86,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
       
       if (result.available) {
         // Move to payment step instead of creating booking immediately
-        setStep(3);
+        setStep(2);
       }
     } catch (error) {
       console.error("Error checking availability:", error);
@@ -105,7 +105,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
 
   const fetchExchangeRate = async () => {
   try {
-    // Using a free API for exchange rates
+    // API for exchange rates
     const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
     const data = await response.json();
     return data.rates.NGN;
@@ -136,10 +136,13 @@ const BookingModal = ({ isOpen, onClose, room }) => {
           roomId: room.id,
           checkIn: formData.checkIn,
           checkOut: formData.checkOut,
+          email: formData.email,
           guests: formData.guests,
           fullName: formData.fullName,
           phone: formData.phone,
-          promoCode: formData.promoCode
+          promoCode: formData.promoCode,
+          roomName: room.name,
+          totalPrice
         }
       });
 
@@ -158,66 +161,11 @@ const BookingModal = ({ isOpen, onClose, room }) => {
     }
   };
 
-  // Handle payment callback when user returns from Paystack
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const reference = urlParams.get('reference');
-    const status = urlParams.get('status');
-
-    if (reference && status === 'success' && isOpen) {
-      handlePaymentVerification(reference);
-    } else if (reference && status === 'cancelled' && isOpen) {
-      setAvailabilityMessage('Payment was cancelled. Please try again.');
-      setStep(2);
-    }
-  }, [isOpen]);
-
-  const handlePaymentVerification = async (reference) => {
-    try {
-      setIsProcessingPayment(true);
-      
-      // Verify payment with backend
-      const verificationResult = await verifyPayment(reference);
-      
-      if (verificationResult.status === 'success') {
-        // Create booking after successful payment verification
-        const totalPrice = calculateTotalPrice();
-        
-        const bookingData = await createBooking(
-          room.id,
-          formData.checkIn,
-          formData.checkOut,
-          formData.email,
-          formData.phone,
-          formData.fullName,
-          formData.guests,
-          formData.promoCode,
-          totalPrice,
-          reference // Include payment reference
-        );
-        
-        console.log('Booking created:', bookingData);
-        setStep(4); // Success step
-      } else {
-        throw new Error('Payment verification failed');
-      }
-    } catch (error) {
-      console.error('Payment verification failed:', error);
-      setAvailabilityMessage('Payment verification failed. Please contact support.');
-      setStep(2);
-    } finally {
-      setIsProcessingPayment(false);
-      
-      // Clean up URL parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  };
-
   const handleContinueClick = () => {
     if (step === 1) {
-      nextStep();
-    } else if (step === 2) {
       handleAvailabilityCheck();
+    } else if (step === 2) {
+      nextStep();
     } else if (step === 3) {
       handlePayment();
     }
@@ -311,6 +259,12 @@ const BookingModal = ({ isOpen, onClose, room }) => {
                         </div>
                       </div>
                     )}
+
+                  {availabilityMessage && (
+                      <div className={`p-3 rounded-lg -ml-2 ${availabilityMessage.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
+                        {availabilityMessage}
+                      </div>
+                  )}
                   </div>
                 </motion.div>
               )}
@@ -321,7 +275,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <h4 className="font-medium mb-4">Enter your details</h4>
+                  <h4 className="font-medium my-4">Enter your details</h4>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">Full Name</label>
@@ -380,11 +334,7 @@ const BookingModal = ({ isOpen, onClose, room }) => {
                       </div>
                     </div>
 
-                    {availabilityMessage && (
-                      <div className={`p-3 rounded-lg ${availabilityMessage.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
-                        {availabilityMessage}
-                      </div>
-                    )}
+
                   </div>
                 </motion.div>
               )}
@@ -452,36 +402,6 @@ const BookingModal = ({ isOpen, onClose, room }) => {
                   </div>
                 </motion.div>
               )}
-
-              {step === 4 && (
-                <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="text-center py-8"
-                >
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <h4 className="text-xl font-bold mb-2">Booking Confirmed!</h4>
-                  <p className="text-gray-600 mb-2">Payment successful! We've sent the details to your email.</p>
-                  <p className="text-sm text-gray-500 mb-6">
-                    {nights} {nights === 1 ? 'night' : 'nights'} • Total: ${totalPrice.toLocaleString()}
-                  </p>
-                  {paymentReference && (
-                    <p className="text-xs text-gray-400 mb-4">
-                      Reference: {paymentReference}
-                    </p>
-                  )}
-                  <button
-                    onClick={onClose}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg w-full hover:bg-blue-700"
-                  >
-                    Done
-                  </button>
-                </motion.div>
-              )}
             </div>
 
             {step < 4 && (
@@ -500,27 +420,27 @@ const BookingModal = ({ isOpen, onClose, room }) => {
                 <button
                   onClick={handleContinueClick}
                   disabled={
-                    (step === 1 && (!formData.checkIn || !formData.checkOut)) ||
-                    (step === 2 && (isCheckingAvailability || !formData.fullName || !formData.email || !formData.phone)) ||
+                    (step === 1 && (!formData.checkIn || !formData.checkOut || isCheckingAvailability)) ||
+                    (step === 2 && (!formData.fullName || !formData.email || !formData.phone)) ||
                     (step === 3 && isProcessingPayment)
                   }
                   className={`px-6 py-2 rounded-lg ${
-                    (step === 1 && (!formData.checkIn || !formData.checkOut)) ||
-                    (step === 2 && (isCheckingAvailability || !formData.fullName || !formData.email || !formData.phone)) ||
+                    (step === 1 && (!formData.checkIn || !formData.checkOut || isCheckingAvailability)) ||
+                    (step === 2 && (!formData.fullName || !formData.email || !formData.phone)) ||
                     (step === 3 && isProcessingPayment)
                       ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
                       : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
                 >
-                  {step === 2 && isCheckingAvailability 
+                  {step === 1 && isCheckingAvailability 
                     ? 'Checking...' 
-                    : step === 2 
+                    : step === 1
                     ? 'Check Availability' 
+                    : step === 2
+                    ? 'Continue'
                     : step === 3 && isProcessingPayment
                     ? 'Processing...'
-                    : step === 3
-                    ? 'Pay Now'
-                    : 'Continue'
+                    : 'Pay Now'
                   }
                 </button>
               </div>

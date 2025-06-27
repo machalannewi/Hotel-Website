@@ -66,7 +66,7 @@ export default function Footer() {
               <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Amenities</a></li>
               <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Events</a></li>
               <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Gallery</a></li>
-                            <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Privacy Policy</a></li>
+              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Privacy Policy</a></li>
             </ul>
           </div>
 
@@ -91,7 +91,7 @@ export default function Footer() {
               </div>
               
               <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                <Mail className="w-5 h-5 text-blue-400 flex-shrink-0"/>
                 <div>
                   <p className="text-gray-300">info@monarchhotel.com</p>
                   <p className="text-gray-300">reservations@monarchhotel.com</p>

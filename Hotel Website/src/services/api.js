@@ -8,8 +8,16 @@ export const checkAvailability = async (roomId, checkIn, checkOut) => {
   return await response.json();
 };
 
-export const createBooking = async (roomId, checkIn, checkOut, email, phone, fullName, guests, promoCode, totalPrice) => {
-  const response = await fetch(`${API_BASE_URL}/api/bookings/input?roomId=${roomId}&checkIn=${checkIn}&checkOut=${checkOut}&email=${email}&phone=${phone}&fullName=${fullName}&guests=${guests}&promoCode=${promoCode}&totalPrice=${totalPrice}`)
+export const searchRoomAvailabilty = async (checkIn, checkOut) => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/search-rooms/available?checkIn=${checkIn}&checkOut=${checkOut}`
+  );
+  if (!response.ok) throw new Error('Network response was not ok');
+  return await response.json();
+};
+
+export const createBooking = async (roomId, checkIn, checkOut, email, phone, fullName, guests, promoCode, totalPrice, roomName) => {
+  const response = await fetch(`${API_BASE_URL}/api/bookings/input?roomId=${roomId}&checkIn=${checkIn}&checkOut=${checkOut}&email=${email}&phone=${phone}&fullName=${fullName}&guests=${guests}&promoCode=${promoCode}&totalPrice=${totalPrice}&roomName=${roomName}`)
   if (!response.ok) throw new Error('Booking failed');
   return await response.json();
 }
@@ -54,68 +62,6 @@ export const verifyPayment = async (reference) => {
     return await response.json();
   } catch (error) {
     console.error('Payment verification error:', error);
-    throw error;
-  }
-};
-
-// Example usage function for payment initialization
-export const processPayment = async (bookingData) => {
-  try {
-    // Prepare payment data
-    const paymentData = {
-      email: bookingData.email,
-      amount: bookingData.totalPrice, // Amount in Naira
-      currency: 'NGN',
-      metadata: {
-        booking_id: bookingData.bookingId,
-        customer_name: bookingData.fullName,
-        phone: bookingData.phone,
-        room_id: bookingData.roomId,
-        check_in: bookingData.checkIn,
-        check_out: bookingData.checkOut,
-        guests: bookingData.guests
-      }
-    };
-    
-    // Initialize payment
-    const paymentResponse = await initializePayment(paymentData);
-    
-    if (paymentResponse.status) {
-      // Redirect to Paystack payment page
-      window.location.href = paymentResponse.data.authorization_url;
-    } else {
-      throw new Error('Payment initialization failed');
-    }
-  } catch (error) {
-    console.error('Process payment error:', error);
-    throw error;
-  }
-};
-
-// Function to handle payment callback (call this on your callback page)
-export const handlePaymentCallback = async () => {
-  try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const reference = urlParams.get('reference');
-    const status = urlParams.get('status');
-    
-    if (!reference) {
-      throw new Error('No payment reference found');
-    }
-    
-    if (status === 'cancelled') {
-      return {
-        status: 'cancelled',
-        message: 'Payment was cancelled'
-      };
-    }
-    
-    // Verify payment
-    const verificationResponse = await verifyPayment(reference);
-    
-    return verificationResponse;
-  } catch (error) {
-    console.error('Payment callback error:', error);
     throw error;
   }
 };

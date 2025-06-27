@@ -7,6 +7,8 @@ import About from './pages/About.jsx';
 import Contact from './pages/Contact.jsx';
 import Rooms from "./pages/Rooms.jsx";
 import MonarchLoader from './components/Loader.jsx';
+import PaymentCallback from './components/PaymentCallback.jsx';
+
 
 function App() {
   const location = useLocation();
@@ -66,6 +68,16 @@ function App() {
               transition={{ duration: 0.5 }}
             >
               <Rooms />
+            </motion.div>
+          } />
+          <Route path="/payment-callback" element={
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <PaymentCallback />
             </motion.div>
           } />
         </Routes>

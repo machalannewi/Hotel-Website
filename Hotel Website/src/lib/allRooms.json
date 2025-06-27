@@ -23,7 +23,7 @@
   {
     "id": 3,
     "name": "Diamond Complex",
-    "price": 399,
+    "price": 500,
     "image": "/images/modern-studio-apartment-design-with-bedroom-living-space.jpg",
     "size": "550 sq ft",
     "beds": "1 King Bed + Sofa Bed",
@@ -34,6 +34,46 @@
     "id": 4,
     "name": "Premium Suite",
     "price": 700,
+    "image": "/images/3d-rendering-luxury-bedroom-suite-resort-hotel-with-twin-bed-living.jpg",
+    "size": "550 sq ft",
+    "beds": "1 King Bed + Sofa Bed",
+    "description": "Wake up to breathtaking ocean views with a private balcony.",
+    "amenities": ["Jacuzzi", "Kitchenette", "Private Terrace"]
+  },
+  {
+    "id": 5,
+    "name": "Emerald Horizon Suite",
+    "price": 900,
+    "image": "/images/Hotel-room1.jpg",
+    "size": "550 sq ft",
+    "beds": "1 King Bed + Sofa Bed",
+    "description": "Wake up to breathtaking ocean views with a private balcony.",
+    "amenities": ["Jacuzzi", "Kitchenette", "Private Terrace"]
+  },
+  {
+    "id": 6,
+    "name": "Royal Palm Retreat",
+    "price": 1100,
+    "image": "/images/Hotel-room2.jpg",
+    "size": "550 sq ft",
+    "beds": "1 King Bed + Sofa Bed",
+    "description": "Wake up to breathtaking ocean views with a private balcony.",
+    "amenities": ["Jacuzzi", "Kitchenette", "Private Terrace"]
+  },
+  {
+    "id": 7,
+    "name": "Celestial Bay View",
+    "price": 1350,
+    "image": "/images/modern-studio-apartment-design-with-bedroom-living-space.jpg",
+    "size": "550 sq ft",
+    "beds": "1 King Bed + Sofa Bed",
+    "description": "Wake up to breathtaking ocean views with a private balcony.",
+    "amenities": ["Jacuzzi", "Kitchenette", "Private Terrace"]
+  },
+  {
+    "id": 8,
+    "name": "The Sapphire Lounge",
+    "price": 1500,
     "image": "/images/3d-rendering-luxury-bedroom-suite-resort-hotel-with-twin-bed-living.jpg",
     "size": "550 sq ft",
     "beds": "1 King Bed + Sofa Bed",
