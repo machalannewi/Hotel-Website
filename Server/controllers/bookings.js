@@ -1,89 +1,47 @@
-import inputAvailableRoom from "../models/bookings.js";
-import { sendBookingConfirmationEmail } from "../services/emailService.js";
-
+import { verifyAndCreateBooking } from "../services/bookingService.js";
 
 const createBooking = async (req, res) => {
-    try {
-      console.log('Received booking request:', req.query);
-        const {
-            roomId,
-            checkIn,
-            checkOut,
-            email,
-            phone,
-            fullName,
-            guests,
-            promoCode,
-            totalPrice,
-            roomName
-        } = req.query;
-        
-        if (!roomId || !checkIn || !checkOut || !email || !phone || !fullName || !guests || !totalPrice || !roomName) {
-            return res.status(400).json({ error: "Missing required parameters" });
-        }
-        console.log('Validation passed, creating booking...');
-        // Create the booking
-        const isBooked = await inputAvailableRoom (
-            roomId,
-            checkIn,
-            checkOut,
-            email,
-            phone,
-            fullName,
-            guests,
-            promoCode,
-            totalPrice,
-            roomName,
-        );
+  try {
+    const { reference } = req.body;
 
-        
-        if (isBooked) {
-
-          console.log('Booking successful, preparing email...');
-            // Calculate nights
-            const checkInDate = new Date(checkIn);
-            const checkOutDate = new Date(checkOut);
-            const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-          
-            
-            // Prepare booking details for email
-            const bookingDetails = {
-                fullName,
-                email,
-                roomName,
-                checkIn,
-                checkOut,
-                guests,
-                totalPrice: parseFloat(totalPrice),
-                nights
-            };
-            
-            // Send confirmation email
-            const emailResult = await sendBookingConfirmationEmail(bookingDetails);
-            
-            if (!emailResult.success) {
-                console.error('Failed to send confirmation email:', emailResult.error);
-                // Still return success for booking, but log email failure
-            }
-            
-            res.json({
-                booked: isBooked,
-                emailSent: emailResult.success,
-                message: emailResult.success 
-                    ? "Booking confirmed and confirmation email sent!" 
-                    : "Booking confirmed but email failed to send. Please contact support."
-            });
-        } else {
-            res.json({
-                booked: false,
-                message: "Booking failed"
-            });
-        }
-        
-    } catch(error) {
-        console.error(error, "Error Inserting Booking");
-        res.status(500).json({ error: "Database error" });
+    if (!reference) {
+      return res.status(400).json({ error: "Payment reference is required" });
     }
+
+    const result = await verifyAndCreateBooking(reference);
+
+    if (result.success) {
+      return res.json({
+        booked: true,
+        alreadyBooked: !!result.alreadyBooked,
+        emailSent: result.emailSent,
+        booking: result.booking,
+        message: result.alreadyBooked
+          ? "Booking already confirmed for this payment."
+          : "Booking confirmed and confirmation email sent!",
+      });
+    }
+
+    const statusByReason = {
+      payment_not_successful: 402,
+      amount_too_low: 402,
+      incomplete_metadata: 400,
+      room_no_longer_available: 409,
+      missing_reference: 400,
+    };
+
+    return res.status(statusByReason[result.reason] || 400).json({
+      booked: false,
+      reason: result.reason,
+      message:
+        result.reason === "room_no_longer_available"
+          ? "Your payment succeeded, but this room was just booked for those dates by someone else. Please contact support with your payment reference for a refund."
+          : "We couldn't confirm this booking.",
+    });
+  } catch (error) {
+    console.error(error, "Error creating booking");
+    res.status(500).json({ error: "Server error" });
+  }
 };
 
 export default createBooking;

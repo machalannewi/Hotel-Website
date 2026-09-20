@@ -1,7 +1,7 @@
 // PaymentCallback.jsx - Create this new component
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { checkAvailability, createBooking, verifyPayment } from '../services/api'; // Your API functions file
+import { createBooking, verifyPayment } from '../services/api'; // Your API functions file
 
 
 const PaymentCallback = () => {
@@ -39,34 +39,19 @@ const PaymentCallback = () => {
         setMetadata(meta);
 
         if (verificationResponse.status === 'success') {
-          setPaymentStatus('success');
-          setPaymentData(verificationResponse.data);
+          // The server re-verifies the payment and atomically checks
+          // room availability before creating the booking, so this single
+          // call is the source of truth — no separate client-side
+          // availability check beforehand (it would just race the server's).
+          const bookingData = await createBooking(reference);
 
-
-          const result = await checkAvailability(
-            meta.roomId,
-            meta.checkIn,
-            meta.checkOut
-          )
-          
-        setAvailabilityMessage(result.message);
-
-        if (result.available) {      
-
-            const bookingData = await createBooking (
-            meta.roomId,
-            meta.checkIn,
-            meta.checkOut,
-            meta.email,
-            meta.phone,
-            meta.fullName,
-            meta.guests,
-            meta.promoCode,
-            meta.totalPrice,
-            meta.roomName
-            );
-
-            console.log(`Booking Data ${bookingData}`);
+          if (bookingData.booked) {
+            setPaymentStatus('success');
+            setPaymentData(verificationResponse.data);
+            setAvailabilityMessage(bookingData.message);
+          } else {
+            setPaymentStatus('failed');
+            setError(bookingData.message || 'We could not confirm your booking.');
           }
 
            setTimeout(() => {

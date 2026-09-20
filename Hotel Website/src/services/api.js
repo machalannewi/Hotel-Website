@@ -16,9 +16,17 @@ export const searchRoomAvailabilty = async (checkIn, checkOut) => {
   return await response.json();
 };
 
-export const createBooking = async (roomId, checkIn, checkOut, email, phone, fullName, guests, promoCode, totalPrice, roomName) => {
-  const response = await fetch(`${API_BASE_URL}/api/bookings/input?roomId=${roomId}&checkIn=${checkIn}&checkOut=${checkOut}&email=${email}&phone=${phone}&fullName=${fullName}&guests=${guests}&promoCode=${promoCode}&totalPrice=${totalPrice}&roomName=${roomName}`)
-  if (!response.ok) throw new Error('Booking failed');
+export const createBooking = async (reference) => {
+  const response = await fetch(`${API_BASE_URL}/api/bookings/input`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ reference }),
+  });
+  // Non-2xx here can still be a meaningful, user-facing outcome (e.g. the
+  // room sold out between payment and confirmation) rather than a hard
+  // failure, so the caller inspects `booked` instead of us throwing.
   return await response.json();
 }
 
