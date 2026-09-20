@@ -7,6 +7,7 @@ import roomsRouter from "./routes/rooms.js";
 import bookingRouter from "./routes/bookings.js";
 import searchRoomRouter from "./routes/searchRoom.js";
 import pool from "./config/db.js";
+import { verifyAndCreateBooking } from "./services/bookingService.js";
 
 
 dotenv.config();
@@ -37,8 +38,6 @@ if (!PAYSTACK_SECRET_KEY) {
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
   next();
 });
 
@@ -106,15 +105,15 @@ app.post("/api/payments/initialize", async (req, res) => {
 
     if (response.data.status) {
       await pool.query(
-        `INSERT INTO payment_logs (reference, email, amount, currency, status, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
+        `INSERT INTO payment_logs (reference, email, amount, currency, status, metadata, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [
           paymentReference,
           email,
           amount,
           currency,
           "initialized",
-        //   JSON.stringify(metadata),
+          JSON.stringify(paymentData.metadata),
           new Date().toISOString(),
         ]
       );
@@ -187,7 +186,41 @@ app.get("/api/payments/verify/:reference", async (req, res) => {
   }
 });
 
-// Webhook handler
+// Webhook handler.
+// This is the authoritative path for turning a payment into a booking:
+// the client-driven callback (PaymentCallback.jsx -> POST /api/bookings/input)
+// covers the common case where the user's browser makes it back to the
+// site, but the webhook is what guarantees a booking still gets created
+// (and the room still gets locked) even if the user closes the tab right
+// after paying. Both paths call the same idempotent verifyAndCreateBooking,
+// so whichever fires first wins and the other is a no-op.
+const handleSuccessfulPayment = async (data) => {
+  try {
+    await pool.query(
+      `UPDATE payment_logs SET status = $1, webhook_received_at = $2, gateway_response = $3 WHERE reference = $4`,
+      ["success", new Date().toISOString(), JSON.stringify(data), data.reference]
+    );
+
+    const result = await verifyAndCreateBooking(data.reference);
+    if (!result.success) {
+      console.error(`Webhook could not create booking for ${data.reference}:`, result.reason);
+    }
+  } catch (error) {
+    console.error("Error handling successful payment webhook:", error);
+  }
+};
+
+const handleFailedPayment = async (data) => {
+  try {
+    await pool.query(
+      `UPDATE payment_logs SET status = $1, webhook_received_at = $2, gateway_response = $3 WHERE reference = $4`,
+      ["failed", new Date().toISOString(), JSON.stringify(data), data.reference]
+    );
+  } catch (error) {
+    console.error("Error handling failed payment webhook:", error);
+  }
+};
+
 app.post("/api/webhooks/paystack", (req, res) => {
   try {
     const hash = crypto
@@ -197,6 +230,11 @@ app.post("/api/webhooks/paystack", (req, res) => {
 
     if (hash === req.headers["x-paystack-signature"]) {
       const event = req.body;
+
+      // Acknowledge immediately so Paystack doesn't retry while we work;
+      // the handlers themselves are idempotent so a retry is harmless
+      // anyway, but there's no need to make Paystack wait on the DB/email work.
+      res.sendStatus(200);
 
       switch (event.event) {
         case "charge.success":
@@ -208,8 +246,6 @@ app.post("/api/webhooks/paystack", (req, res) => {
         default:
           console.log("Unhandled webhook event:", event.event);
       }
-
-      res.sendStatus(200);
     } else {
       console.error("Invalid webhook signature");
       res.sendStatus(400);
