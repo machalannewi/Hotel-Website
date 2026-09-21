@@ -24,10 +24,11 @@ const createBooking = async (req, res) => {
 
     const statusByReason = {
       payment_not_successful: 402,
-      amount_too_low: 402,
+      amount_mismatch: 402,
       incomplete_metadata: 400,
       room_no_longer_available: 409,
       missing_reference: 400,
+      reference_not_found: 404,
     };
 
     return res.status(statusByReason[result.reason] || 400).json({

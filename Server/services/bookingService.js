@@ -12,11 +12,6 @@ const paystackAPI = axios.create({
   },
 });
 
-// Paystack charges a nominal amount for card verification; anything below
-// this (in kobo) is treated as "no real payment was made" rather than
-// trying to reproduce the client's exchange-rate math server-side.
-const MIN_PAID_KOBO = 10000; // ₦100
-
 const REQUIRED_METADATA_FIELDS = [
   "roomId",
   "checkIn",
@@ -51,21 +46,39 @@ export const verifyAndCreateBooking = async (reference) => {
     return { success: true, alreadyBooked: true, booking: existing.rows[0] };
   }
 
-  const verifyResponse = await paystackAPI.get(`/transaction/verify/${reference}`);
+  let verifyResponse;
+  try {
+    verifyResponse = await paystackAPI.get(`/transaction/verify/${reference}`);
+  } catch (error) {
+    if (error.response?.status === 400 || error.response?.data?.code === "transaction_not_found") {
+      return { success: false, reason: "reference_not_found" };
+    }
+    throw error;
+  }
   const transaction = verifyResponse.data?.data;
 
   if (!verifyResponse.data?.status || transaction?.status !== "success") {
     return { success: false, reason: "payment_not_successful" };
   }
 
-  if (typeof transaction.amount !== "number" || transaction.amount < MIN_PAID_KOBO) {
-    return { success: false, reason: "amount_too_low" };
-  }
-
   const metadata = transaction.metadata || {};
   const missingField = REQUIRED_METADATA_FIELDS.find((field) => !metadata[field] && metadata[field] !== 0);
   if (missingField) {
     return { success: false, reason: "incomplete_metadata", missingField };
+  }
+
+  // The amount actually charged (Paystack-confirmed, can't be tampered
+  // with after the fact) must match what we ourselves computed and asked
+  // Paystack to charge when this reference was created — logged in
+  // payment_logs at initialize time, never derived from client input.
+  const { rows: logRows } = await pool.query(
+    `SELECT amount FROM payment_logs WHERE reference = $1`,
+    [reference]
+  );
+  const expectedAmountKobo = logRows[0] ? Math.round(Number(logRows[0].amount) * 100) : null;
+
+  if (expectedAmountKobo == null || transaction.amount !== expectedAmountKobo) {
+    return { success: false, reason: "amount_mismatch" };
   }
 
   const {
