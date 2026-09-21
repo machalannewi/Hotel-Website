@@ -8,6 +8,7 @@ import bookingRouter from "./routes/bookings.js";
 import searchRoomRouter from "./routes/searchRoom.js";
 import pool from "./config/db.js";
 import { verifyAndCreateBooking } from "./services/bookingService.js";
+import { computeBookingPrice, getRoomName } from "./services/pricingService.js";
 
 
 dotenv.config();
@@ -66,28 +67,58 @@ app.post("/api/payments/initialize", async (req, res) => {
 
     const {
       email,
-      amount,
-      currency = "NGN",
-      reference,
+      phone,
+      fullName,
+      guests,
+      promoCode,
+      roomId,
+      checkIn,
+      checkOut,
       callback_url,
-      metadata,
     } = req.body;
 
-    if (!email || !amount) {
+    if (!email || !phone || !fullName || !guests || !roomId || !checkIn || !checkOut) {
       return res.status(400).json({
-        error: "Email and amount are required",
-        received: { email, amount }
+        error: "Missing required booking details",
+        received: { email, phone, fullName, guests, roomId, checkIn, checkOut }
       });
     }
 
-    const paymentReference =
-      reference ||
-      `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // The price is computed here, from the room's known price and a
+    // server-fetched exchange rate — never from anything the client sends.
+    // This is what actually gets charged, so it can't be tampered with by
+    // altering the request.
+    const pricing = await computeBookingPrice(roomId, checkIn, checkOut);
+    if (!pricing) {
+      return res.status(400).json({ error: "Unknown room or invalid dates" });
+    }
+
+    const roomName = await getRoomName(roomId);
+    if (!roomName) {
+      return res.status(400).json({ error: "Unknown room" });
+    }
+
+    const paymentReference = `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    const metadata = {
+      roomId,
+      checkIn,
+      checkOut,
+      email,
+      phone,
+      fullName,
+      guests,
+      promoCode: promoCode || null,
+      roomName,
+      totalPrice: pricing.totalPriceUsd,
+      nights: pricing.nights,
+      exchangeRate: pricing.rate,
+    };
 
     const paymentData = {
       email,
-      amount: Math.round(amount * 100),
-      currency,
+      amount: pricing.amountKobo,
+      currency: "NGN",
       reference: paymentReference,
       callback_url:
         callback_url ||
@@ -110,15 +141,15 @@ app.post("/api/payments/initialize", async (req, res) => {
         [
           paymentReference,
           email,
-          amount,
-          currency,
+          pricing.amountKobo / 100,
+          "NGN",
           "initialized",
           JSON.stringify(paymentData.metadata),
           new Date().toISOString(),
         ]
       );
 
-      res.json(response.data);
+      res.json({ ...response.data, pricing: { totalPriceUsd: pricing.totalPriceUsd, totalPriceNgn: pricing.totalPriceNgn, nights: pricing.nights } });
     } else {
       throw new Error("Failed to initialize payment with Paystack");
     }

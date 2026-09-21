@@ -96,54 +96,24 @@ const BookingModal = ({ isOpen, onClose, room }) => {
     }
   };
 
-  const USD_TO_NGN_RATE = 1650;
-
-  const convertUsdToNgn = (usdAmount, exchangeRate = USD_TO_NGN_RATE) => {
-  return Math.round(usdAmount * exchangeRate);
-};
-
-
-  const fetchExchangeRate = async () => {
-  try {
-    // API for exchange rates
-    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-    const data = await response.json();
-    return data.rates.NGN;
-  } catch (error) {
-    console.error('Failed to fetch exchange rate, using fallback:', error);
-    return USD_TO_NGN_RATE; // Fallback to fixed rate
-  }
-};
-
   const handlePayment = async () => {
     setIsProcessingPayment(true);
-    const totalPrice = calculateTotalPrice();
-
-    const currentRate = await fetchExchangeRate();
-    const totalPriceInNaira = convertUsdToNgn(totalPrice, currentRate);
-    
-    console.log(`Converting $${totalPrice} to $${totalPriceInNaira.toLocaleString()} at rate ${currentRate}`);
 
     try {
-      // Initialize payment with backend
+      // The server computes the room price and the NGN amount to charge
+      // itself (from the room's known price and its own exchange-rate
+      // lookup) — we only send booking details, never a price, so what
+      // gets charged can't be altered by tampering with this request.
       const paymentData = await initializePayment({
         email: formData.email,
-        amount: totalPriceInNaira, // Paystack expects amount in kobo (cents)
-        currency: 'NGN',
-        reference: `booking_${Date.now()}`,
+        phone: formData.phone,
+        fullName: formData.fullName,
+        guests: formData.guests,
+        promoCode: formData.promoCode,
+        roomId: room.id,
+        checkIn: formData.checkIn,
+        checkOut: formData.checkOut,
         callback_url: `${window.location.origin}/payment-callback`,
-        metadata: {
-          roomId: room.id,
-          checkIn: formData.checkIn,
-          checkOut: formData.checkOut,
-          email: formData.email,
-          guests: formData.guests,
-          fullName: formData.fullName,
-          phone: formData.phone,
-          promoCode: formData.promoCode,
-          roomName: room.name,
-          totalPrice
-        }
       });
 
       if (paymentData.status && paymentData.data) {
